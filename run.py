@@ -275,6 +275,30 @@ def already_done():
                            conclusion=conclusion_text)
 
 
+@app.route('/save-rrweb-data', methods=['POST'])
+def save_rrweb_data():
+    user_id = request.cookies.get('experiment-userid')
+    rrweb_data = request.get_json()
+    if not user_id or not rrweb_data:
+        return 'Missing user_id or rrweb_data', 400
+
+    # 假设有一个函数来保存这些数据
+    # 您需要根据应用程序的需求实现 save_data() 方法
+    # 它可以是保存到数据库或者写入文件
+    save_data(user_id, rrweb_data)
+    return 'Data saved', 200
+
+
+# 这里需要添加一个保存数据的方法
+def save_data(user_id, data):
+    # 根据你的存储需求实现数据保存逻辑
+    # 这里只是一个示例，将数据保存到文件
+    filename = f'{user_id}_rrweb_data.json'
+    with open(filename, 'w') as f:
+        json.dump(data, f, ensure_ascii=False, indent=4)
+    print(f'Data saved for user {user_id}')
+
+
 def log_received_data(user_id, data):
     """
     We log all the data to a file (filename=userid)

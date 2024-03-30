@@ -55,6 +55,80 @@
             $("#final-questions").show();
         }
     </script>
+    <!-- Include rrweb recording script -->
+    <link
+            rel="stylesheet"
+            href="https://cdn.jsdelivr.net/npm/rrweb@latest/dist/rrweb.min.css"
+    />
+    <script src="https://cdn.jsdelivr.net/npm/rrweb@latest/dist/rrweb.min.js"></script>
+    <script>
+        let events = [];
+        let stopRecording; // 用来存储停止录制的函数
+
+        function startRecording() {
+            // 清空之前的录制数据
+            events = [];
+
+            // 开始录制
+            console.log('-----Start recording-----');
+            stopRecording = rrweb.record({
+                emit(event) {
+                    // 将事件推送到 events 数组
+                    events.push(event);
+                },
+                // 在这里可以设置 rrweb 的其他选项
+            });
+        }
+
+        function stopAndHandleRecording() {
+            console.log('-----Stop recording-----');
+            if (typeof stopRecording === 'function') {
+                stopRecording(); // 停止录制
+                stopRecording = null;
+
+                // 这里处理记录的事件
+                // 例如，发送事件到您的服务器端点
+                fetch('/save-rrweb-data', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ events }),
+                })
+                    .then(response => {
+                        if (!response.ok) {
+                            // 如果服务器响应不是 2xx, 抛出错误
+                            throw new Error('Network response was not ok.');
+                        }
+                        return response.text();
+                    })
+                    .then(data => {
+                        console.log('Data saved:', data);
+                    })
+                    .catch(error => {
+                        console.error('There has been a problem with your fetch operation:', error);
+                    });
+
+                // 清空事件数组以便下次录制
+                events = [];
+            }
+        }
+
+        // 在 DOM 完全加载后设置事件监听
+        document.addEventListener('DOMContentLoaded', () => {
+            const startButton = document.getElementById('start-recording');
+            const stopButton = document.getElementById('stop-recording');
+
+            if (startButton) {
+                startButton.addEventListener('click', startRecording);
+            }
+
+            if (stopButton) {
+                stopButton.addEventListener('click', stopAndHandleRecording);
+            }
+        });
+    </script>
+
 </head>
 <style>
     #mergely-splash { display: none !important;}
@@ -80,7 +154,7 @@
     </div>
     <div>
         <form method="get" id="button-continue">
-            <button type="button" class="button blue" style="height: 50px;">I have read the instructions and I want to start the review ►</button><br><br>
+            <button type="button" class="button blue" style="height: 50px;" onclick="startRecording();">I have read the instructions and I want to start the review ►</button><br><br>
         </form>
     </div>
     <div class="mergely-full-screen-8" style="overflow-y: scroll; display: none" id="div-mergely">
@@ -98,7 +172,7 @@
             {% endfor %}
         </div>
         <div style="clear: both;">
-            <button id="review-completed" class="button blue" onclick="showquestions();">I have completed my review</button>
+            <button id="review-completed" class="button blue" onclick="stopAndHandleRecording(); showquestions();">I have completed my review</button>
         </div>
         <div style="clear: both; display: none" id="final-questions">
             <form action="experiment_concluded" method="post" id="current_form">

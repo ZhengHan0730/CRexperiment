@@ -1,0 +1,15 @@
+{
+  "name": "crexperiment",
+  "version": "1.0.0",
+  "description": "This tool can be used to do online (controlled) experiments on code reviews. CRExperiment has been previously used in these studies:",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "rrweb": "^2.0.0-alpha.4"
+  }
+}
